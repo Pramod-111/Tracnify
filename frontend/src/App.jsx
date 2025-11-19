@@ -7,6 +7,7 @@ function App() {
   useEffect(() => {
     axios.get('/api/jokes')
     .then((response) => {
+      // console.log(response.data);
       setJokes(response.data)
     })
     .catch((error) => {
@@ -21,14 +22,22 @@ function App() {
       <h1>Protein Powder</h1>
       <p>Jokes: {jokes.length}</p>
 
-      {
-        jokes.map((joke, index) => (
+      {/* {
+        jokes.map((joke) => (
           <div key={joke.id}>
             <h3>{joke.title}</h3>
             <p>{joke.content}</p>
           </div>
         ))
-      }
+      } */}
+      {
+      Array.isArray(jokes) && jokes.map((joke) => (
+        <div key={joke.id}>
+          <h3>{joke.title}</h3>
+          <p>{joke.content}</p>
+        </div>
+      ))
+    }
     </div>
 
     </>
