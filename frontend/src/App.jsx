@@ -19,7 +19,7 @@ function App() {
     <>
 
     <div className="bg-black text-white flex items-center text-2xl justify-center flex-col h-screen w-full">
-      <h1>Protein Powder</h1>
+      <h1>Virtual</h1>
       <p>Jokes: {jokes.length}</p>
 
       {/* {
