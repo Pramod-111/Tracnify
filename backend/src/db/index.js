@@ -11,8 +11,8 @@ const connectDB = async () => {
   }
   const fullUri = `${uri}/${DB_NAME}?retryWrites=true&w=majority`;
   return mongoose.connect(fullUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true
   });
 };
 
