@@ -1,90 +1,49 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
 import connectDB from "./db/index.js";
 
-dotenv.config({ path: "./.env" });
-
-const app = express();
-
-// middleware
-app.use(express.json());
-app.use(cors()); 
-// routes
 import trainerRoutes from "./routes/trainer.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 import exerciseRoutes from "./routes/exercise.routes.js";
+import errorHandler from "./middleware/error.middleware.js";
 
+dotenv.config({ path: "./.env" });
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// middlewares
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+
+// health
+app.get("/", (req, res) => {
+  res.json({ message: "Trackcify backend is running" });
+});
+
+// api routes
 app.use("/api/trainers", trainerRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/exercises", exerciseRoutes);
 
-app.get("/", (req, res) => {
-    res.send("Server is running");
-});
+// error handler (should be last)
+app.use(errorHandler);
 
+// connect db then start
 connectDB()
-    .then(() => {
-        const port = process.env.PORT || 5000;
-        app.listen(port, () => {
-            console.log(`Server is running at http://localhost:${port}`);
-        });
-    })
-    .catch((err) => {
-        console.log("MongoDB connection failed:", err);
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
-
-
-
-
-
-
-
-
-
-
-
-// import express from 'express'
-// import dotenv from 'dotenv'
-// import connectDB from './db/index.js'
-
-// // Load environment variables
-// dotenv.config({ path: './env' })
-
-// const app = express()
-
-// // Basic route
-// app.get('/', (req, res) => {
-//     res.send('Server is ready')
-// })
-
-// // Jokes API route
-// // app.get('/api/jokes', (req, res) => {
-// //     const jokes = [
-// //         { id: 1, title: 'A joke', content: 'This is a joke' },
-// //         { id: 2, title: 'Another joke', content: 'This is another joke' },
-// //         { id: 3, title: 'A third joke', content: 'This is third joke' },
-// //         { id: 4, title: 'A fourth joke', content: 'This is a fourth joke' },
-// //         { id: 5, title: 'A fifth joke', content: 'This is a fifth joke' }
-// //     ];
-// //     res.json(jokes)
-// // })
-
-// // Connect DB and start server
-// connectDB()
-//     .then(() => {
-//         const port = process.env.PORT || 5000
-//         app.listen(port, () => {
-//             console.log(`Server is running at http://localhost:${port}`)
-//         })
-//     })
-//     .catch((err) => {
-//         console.log("MongoDB connection failed:", err)
-//     })
-
-
-
-
-
+  })
+  .catch((err) => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  });

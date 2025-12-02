@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { BrowserRouter } from "react-router-dom";
-
-import Navbar from "./components/layouts/Navbar";
+import NavBar from "./components/layouts/Navbar";
 import Footer from "./components/layouts/Footer";
 import RoutesClient from "./routes/routes";
+import { BrowserRouter } from "react-router-dom";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function App() {
   const [backendStatus, setBackendStatus] = useState("Checking backend...");
@@ -18,21 +18,14 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-gray-50">
-
-        <div className="bg-gray-800 text-white text-center py-2 text-sm">
-          {backendStatus}
-        </div>
-
-        <Navbar />
-
-        <main className="flex-grow px-4 md:px-8 py-6">
-          <RoutesClient />
-        </main>
-
+      <div className={`min-h-[50vh] flex flex-col bg-gray-200 mt-25`}>
+        <NavBar />
+          <main>
+            <RoutesClient />
+          </main>
         <Footer />
       </div>
-    </BrowserRouter>
+    </BrowserRouter> 
   );
 }
 

@@ -1,12 +1,18 @@
 import mongoose from "mongoose";
 
-const trainerSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    image: { type: String, required: true },
-    specialization: { type: String, required: true },
-    about: { type: String, required: true },
-    rating: { type: Number, default: 5 },
-    clients: { type: Number, default: 0 }
-}, { timestamps: true });
+const TrainerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  title: { type: String }, // e.g., "Certified Personal Trainer"
+  bio: { type: String },
+  specialties: [{ type: String }],
+  rating: { type: Number, default: 0 },
+  reviewsCount: { type: Number, default: 0 },
+  experienceYears: { type: Number },
+  profilePicture: { type: String }, // URL
+  pricePerSession: { type: Number },
+  location: { type: String },
+  tags: [{ type: String }],
+  createdAt: { type: Date, default: Date.now }
+});
 
-export default mongoose.model("Trainer", trainerSchema);
+export default mongoose.model("Trainer", TrainerSchema);

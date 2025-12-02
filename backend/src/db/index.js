@@ -1,15 +1,19 @@
 import mongoose from "mongoose";
-// import { DB_NAME } from "../constants.js"
-import { DB_NAME } from "../constants.js"
+import dotenv from "dotenv";
+import { DB_NAME } from "../constants.js";
+
+dotenv.config({ path: "./.env" });
 
 const connectDB = async () => {
-    try {
-        const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        console.log(`\n MongoDB connected !! DB HOST: ${connectionInstance.connection.host}`);
-    } catch (error) {
-        console.log("MONGODB connection FAiled", error);
-        process.exit(1)
-    }
-}
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI not set in environment");
+  }
+  const fullUri = `${uri}/${DB_NAME}?retryWrites=true&w=majority`;
+  return mongoose.connect(fullUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+};
 
-export default connectDB
+export default connectDB;

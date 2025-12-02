@@ -1,33 +1,79 @@
 import Trainer from "../models/trainer.model.js";
+import Review from "../models/review.model.js";
 
-// GET all trainers
-export const getTrainers = async (req, res) => {
+/**
+ * GET /api/trainers
+ * Query: ?page=1&limit=12&search=keyword&specialty=yoga
+ */
+export const listTrainers = async (req, res, next) => {
   try {
-    const trainers = await Trainer.find();
-    res.json(trainers);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching trainers", error });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.search) {
+      const q = req.query.search;
+      filter.$or = [
+        { name: new RegExp(q, "i") },
+        { title: new RegExp(q, "i") },
+        { specialties: new RegExp(q, "i") }
+      ];
+    }
+    if (req.query.specialty) {
+      filter.specialties = req.query.specialty;
+    }
+
+    const [items, total] = await Promise.all([
+      Trainer.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }),
+      Trainer.countDocuments(filter)
+    ]);
+
+    res.json({ items, page, total, totalPages: Math.ceil(total / limit) });
+  } catch (err) {
+    next(err);
   }
 };
 
-// ADD a new trainer
-export const addTrainer = async (req, res) => {
+export const getTrainer = async (req, res, next) => {
   try {
-    const trainer = new Trainer(req.body);
-    await trainer.save();
+    const trainer = await Trainer.findById(req.params.id);
+    if (!trainer) return res.status(404).json({ message: "Trainer not found" });
 
-    res.status(201).json({ message: "Trainer added successfully", trainer });
-  } catch (error) {
-    res.status(400).json({ message: "Error adding trainer", error });
+    const reviews = await Review.find({ trainer: trainer._id }).sort({ createdAt: -1 });
+
+    res.json({ trainer, reviews });
+  } catch (err) {
+    next(err);
   }
 };
 
-// DELETE a trainer
-export const deleteTrainer = async (req, res) => {
+export const createTrainer = async (req, res, next) => {
   try {
-    await Trainer.findByIdAndDelete(req.params.id);
-    res.json({ message: "Trainer deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting trainer", error });
+    const payload = req.body;
+    const created = await Trainer.create(payload);
+    res.status(201).json(created);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateTrainer = async (req, res, next) => {
+  try {
+    const updated = await Trainer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Trainer not found" });
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteTrainer = async (req, res, next) => {
+  try {
+    const removed = await Trainer.findByIdAndDelete(req.params.id);
+    if (!removed) return res.status(404).json({ message: "Trainer not found" });
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    next(err);
   }
 };
